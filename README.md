@@ -1,12 +1,13 @@
-U-Boot modification for MT7621 Devices
-==========
-Forked from FireWRT Uboot @ commit 4f84dbda5ccb762d92e6c13196d55d64334628d7
+U-Boot for MikroTik RB750Gr3
+============================
 
-**Flashing the bootloader is risky.**
+# Features
+* Firmware flash from HTTP, TFTP and serial
+* U-Boot flash from TFTP
 
-**If you like expensive bricks proceed without caution.**
+# Notes/Warnings
+* Initial flash must be done with an SPI programmer as factory bootloader (RouterBOOT) is locked down
+* Bad flash subsequently could brick router and require SPI programmer flashing again
 
-**You will need a working Serial Console and a TFTP server.**
-
-From the Serial Console (UART) : Option 9
-
+# Credits
+Forked from [pinney/MT7621-u-boot-mod@5688587](https://github.com/pinney/MT7621-u-boot-mod/commit/5688587b9031073d95c8af5e878cf6ce8f3c0962)
