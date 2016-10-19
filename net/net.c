@@ -84,10 +84,6 @@
 #include <status_led.h>
 #include <miiphy.h>
 #endif
-//!增加的头文件
-#ifdef OLED_1_3
-#include <oled.h>
-#endif
 #include "../httpd/fs.h"
 #include "../httpd/fsdata.h"
 

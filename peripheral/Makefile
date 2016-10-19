@@ -5,9 +5,7 @@
 include $(TOPDIR)/config.mk
 
 LIB   = libperipheral.a
-OBJS += led.o
 OBJS += wps.o
-OBJS += oled.o
 
 all:    $(LIB)
 $(LIB): $(START) $(OBJS)

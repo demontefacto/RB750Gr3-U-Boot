@@ -34,9 +34,6 @@
 #include <nand_api.h>
 #include <led.h>
 #include <wps.h>
-#ifdef OLED_1_3
-#include <oled.h>
-#endif
 DECLARE_GLOBAL_DATA_PTR;
 cmd_tbl_t *p_gmdtp;//用于httpd.c中固件更新完后重启内核
 #undef DEBUG
@@ -537,7 +534,6 @@ static int init_func_ram (void)
 
 static int display_banner(void)
 {
-   
 	printf ("\n\n%s\n\n", version_string);
 	return (0);
 }
@@ -601,21 +597,6 @@ init_fnc_t *init_sequence[] = {
 };
 #endif
 
-//
-void printBanner(void)
-{
-    printf("\n\n");
-    printf("       _           _____         _____\n");
-    printf("       /           /    )        /    )   ♥\n");
-    printf("      /           /    /        /____/       ___   ___   __\n");
-    printf("     /           /    /        /        /   /   ) /   ) /__)  /   /\n");
-    printf("   _/____/ ♠    /____/   ♣    /        /   /   / /   / (_    (___/ ♦\n");
-    printf("                                                                /\n");
-    printf("                                                          _____/\n");
-    printf("-------------------------------------------------------------------------\n");
-    printf("             https://github.com/pinney/MT7621-u-boot-mod\n");
-    printf("-------------------------------------------------------------------------\n");
-}
 void board_init_f(ulong bootflag)
 {
 	gd_t gd_data, *id;
@@ -891,7 +872,7 @@ void board_init_f(ulong bootflag)
 #define SEL_LOAD_LINUX_WRITE_FLASH      2
 #define SEL_BOOT_FLASH                  3
 #define SEL_ENTER_CLI                   4
-#define SEL_LOAD_LINUX_WRITE_FLASH_Httpd 5
+#define SEL_LOAD_LINUX_WRITE_FLASH_BY_HTTP 5
 #define SEL_LOAD_BOOT_WRITE_FLASH_BY_SERIAL 7
 #define SEL_LOAD_BOOT_SDRAM             8
 #define SEL_LOAD_BOOT_WRITE_FLASH       9
@@ -906,7 +887,7 @@ void OperationSelect(void)
 #ifdef RALINK_CMDLINE
 	printf("   %d: Entr boot command line interface.\n", SEL_ENTER_CLI);
 #endif // RALINK_CMDLINE //
-	printf("   %d: Load system code then write to Flash via Httpd.\n",SEL_LOAD_LINUX_WRITE_FLASH_Httpd);//5 从httpd烧写固件
+	printf("   %d: Load system code then write to Flash via built-in Web Server.\n",SEL_LOAD_LINUX_WRITE_FLASH_BY_HTTP);
 #ifdef RALINK_UPGRADE_BY_SERIAL
 	printf("   %d: Load Boot Loader code then write to Flash via Serial. \n", SEL_LOAD_BOOT_WRITE_FLASH_BY_SERIAL);
 #endif // RALINK_UPGRADE_BY_SERIAL //
@@ -1309,57 +1290,6 @@ int check_image_validation(void)
  */
 
 gd_t gd_data;
-
-
-#ifdef GPIO_TEST
-void gpio_test(void)
-{
-    int i = 100;
-    OLED_Init();
-    printf("GPIO TEST Starting\n");
-    for(i=0;i<100;++i){
-        OLED_CS_Clr();
-        udelay(5000);
-        OLED_CS_Set();
-    }
-    printf("GPIO TEST end\n");
-}
-#endif
-
-
-
-
-#ifdef OLED_1_3
-void oled_print(void)
-{
-    OLED_Clear();
-    OLED_ShowString(0,0,"    Banner");
-    OLED_ShowString(0,2,"  Httpd Ready");
-}
-void oled_uboot_start()
-{
-    OLED_Init();
-    OLED_Clear();
-    OLED_ShowString(0,0,"    Banner");
-    OLED_ShowString(0,2,"Update Firmware");
-    OLED_ShowString(0,4," Press WPS Key");
-}
-void oled_timeout(int timeout)
-{
-    unsigned char oled_timeouchar[16];
-    OLED_Clear_page(6);
-    sprintf(oled_timeouchar," Timeout:%ds",timeout);
-    OLED_ShowString(0,6,oled_timeouchar);
-}
-void oled_load_banner(void)
-{
-    OLED_Clear();
-    OLED_ShowString(0,0,"    Banner");
-    OLED_ShowString(0,2,"Loading Firmware");
-}
-#endif
-
-
 
 void board_init_r (gd_t *id, ulong dest_addr)
 {
@@ -2019,36 +1949,17 @@ void board_init_r (gd_t *id, ulong dest_addr)
 	    s = getenv ("bootdelay");
 	    timer1 = s ? (int)simple_strtol(s, NULL, 10) : CONFIG_BOOTDELAY;
 	}
-#ifdef GPIO_TEST
-    gpio_test();
-#endif
 
-#ifdef LED_POWER
-    init_power_led();
-    control_power_led(0);
-#endif
-    
-    printBanner();
-	OperationSelect();
- 
-#ifdef OLED_1_3
-    oled_uboot_start();
-#endif
+OperationSelect();
 
     init_wps();
-	
+
     while (timer1 > 0) {
-#ifdef OLED_1_3
-        oled_timeout(timer1);
-#endif
 		--timer1;
 		/* delay 100 * 10ms */
 		for (i=0; i<100; ++i) {
             if(readwps() == 0){
                 BootType = '5';
-#ifdef LED_POWER
-                control_power_led(1);
-#endif
                 break;
             }
 
@@ -2067,17 +1978,11 @@ void board_init_r (gd_t *id, ulong dest_addr)
 	}
 	putc ('\n');
 	p_gmdtp = cmdtp;//记录下命令参数
-    
+
     if((BootType == '2') || (BootType == '9'))
         ALL_LANPartition();
 
 	if(BootType == '3') {
-#ifdef LED_POWER
-        control_power_led(1);
-#endif
-#ifdef OLED_1_3
-        oled_load_banner();
-#endif
 		char *argv[2];
 		sprintf(addr_str, "0x%X", CFG_KERN_ADDR);
 		argv[1] = &addr_str[0];
@@ -2096,7 +2001,7 @@ void board_init_r (gd_t *id, ulong dest_addr)
 #endif
 
 		switch(BootType) {
-		case '1':
+		case SEL_LOAD_LINUX_SDRAM:
 			printf("   \n%d: System Load Linux to SDRAM via TFTP. \n", SEL_LOAD_LINUX_SDRAM);
 			tftp_config(SEL_LOAD_LINUX_SDRAM, argv);           
 			argc= 3;
@@ -2104,10 +2009,7 @@ void board_init_r (gd_t *id, ulong dest_addr)
 			do_tftpb(cmdtp, 0, argc, argv);
 			break;
 
-		case '2':
-#ifdef LED_POWER
-            control_power_led(1);
-#endif
+		case SEL_LOAD_LINUX_WRITE_FLASH:
 			printf("   \n%d: System Load Linux Kernel then write to Flash via TFTP. \n", SEL_LOAD_LINUX_WRITE_FLASH);
 			printf(" Warning!! Erase Linux in Flash then burn new one. Are you sure?(Y/N)\n");
 			confirm = getc();
@@ -2185,34 +2087,23 @@ void board_init_r (gd_t *id, ulong dest_addr)
 			argc= 2;
 			sprintf(addr_str, "0x%X", CFG_KERN_ADDR);
 			argv[1] = &addr_str[0];
-			do_bootm(cmdtp, 0, argc, argv);            
+			do_bootm(cmdtp, 0, argc, argv);
 			break;
 
 #ifdef RALINK_CMDLINE
-		case '4':
-#ifdef LED_POWER
-            control_power_led(1);
-#endif
+		case SEL_ENTER_CLI:
 			printf("   \n%d: System Enter Boot Command Line Interface.\n", SEL_ENTER_CLI);
 			printf ("\n%s\n", version_string);
 			/* main_loop() can return to retry autoboot, if so just run it again. */
-			for (;;) {					
-				main_loop ();
-			}
+			while (true) main_loop();
 			break;
-		case '5'://！从httpd更新固件
-#ifdef LED_POWER
-            control_power_led(1);
-#endif
-#ifdef OLED_1_3
-            oled_print();
-#endif
+		case SEL_LOAD_LINUX_WRITE_FLASH_BY_HTTP:
 			NetLoopHttpd();
 			break;
-		
+
 #endif // RALINK_CMDLINE //
 #ifdef RALINK_UPGRADE_BY_SERIAL
-		case '7':
+		case SEL_LOAD_BOOT_WRITE_FLASH_BY_SERIAL:
 			printf("\n%d: System Load Boot Loader then write to Flash via Serial. \n", SEL_LOAD_BOOT_WRITE_FLASH_BY_SERIAL);
 			argc= 1;
 			setenv("autostart", "no");
@@ -2259,7 +2150,7 @@ void board_init_r (gd_t *id, ulong dest_addr)
 			do_reset(cmdtp, 0, argc, argv);
 			break;
 #endif // RALINK_UPGRADE_BY_SERIAL //
-		case '8':
+		case SEL_LOAD_BOOT_SDRAM:
 			printf("   \n%d: System Load UBoot to SDRAM via TFTP. \n", SEL_LOAD_BOOT_SDRAM);
 			tftp_config(SEL_LOAD_BOOT_SDRAM, argv);
 			argc= 3;
@@ -2267,10 +2158,7 @@ void board_init_r (gd_t *id, ulong dest_addr)
 			do_tftpb(cmdtp, 0, argc, argv);
 			break;
 
-		case '9':
-#ifdef LED_POWER
-            control_power_led(1);
-#endif
+		case SEL_LOAD_BOOT_WRITE_FLASH:
 			printf("   \n%d: System Load Boot Loader then write to Flash via TFTP. \n", SEL_LOAD_BOOT_WRITE_FLASH);
 			printf(" Warning!! Erase Boot Loader in Flash then burn new one. Are you sure?(Y/N)\n");
 			confirm = getc();

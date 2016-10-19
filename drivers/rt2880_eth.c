@@ -1101,26 +1101,26 @@ void LANWANPartition(void)
       (defined(MT7620_ASIC_BOARD) && defined(P5_RGMII_TO_MAC_MODE))
 /*Set  MT7530 */
 #ifdef RALINK_DEMO_BOARD_PVLAN
-	printf("set LAN/WAN WLL\n");
+	printf("set LAN/WAN WLLLL\n");
 	//WLLLL, wan at P0, demo board
 	//LAN/WAN ports as security mode
-	//mii_mgr_write(31, 0x2004, 0xff0003);//port0
-	//mii_mgr_write(31, 0x2104, 0xff0003);//port1
+	mii_mgr_write(31, 0x2004, 0xff0003);//port0
+	mii_mgr_write(31, 0x2104, 0xff0003);//port1
 	mii_mgr_write(31, 0x2204, 0xff0003);//port2
 	mii_mgr_write(31, 0x2304, 0xff0003);//port3
 	mii_mgr_write(31, 0x2404, 0xff0003);//port4
 	//mii_mgr_write(31, 0x2504, 0xff0003);//port5
-	//mii_mgr_write(31, 0x2604, 0xff0003);//port5
+	//mii_mgr_write(31, 0x2604, 0xff0003);//port6
 
 	//set PVID
-	//mii_mgr_write(31, 0x2014, 0x10002);//port0
-	//mii_mgr_write(31, 0x2114, 0x10001);//port1
+	mii_mgr_write(31, 0x2014, 0x10002);//port0
+	mii_mgr_write(31, 0x2114, 0x10001);//port1
 	mii_mgr_write(31, 0x2214, 0x10001);//port2
 	mii_mgr_write(31, 0x2314, 0x10001);//port3
-	mii_mgr_write(31, 0x2414, 0x10002);//port4
+	mii_mgr_write(31, 0x2414, 0x10001);//port4
 	//mii_mgr_write(31, 0x2514, 0x10001);//port5
 	//mii_mgr_write(31, 0x2614, 0x10001);//port6
-	/*port6 */
+
 	//VLAN member
 	IsSwitchVlanTableBusy();
 	mii_mgr_write(31, 0x94, 0x407e0001);//VAWD1
@@ -1159,7 +1159,7 @@ void LANWANPartition(void)
 	mii_mgr_write(31, 0x94, 0x404f0001);//VAWD1
 	mii_mgr_write(31, 0x90, 0x80001001);//VTCR, VID=1
 	IsSwitchVlanTableBusy();
-	
+
 	//mii_mgr_write(31, 0x94, 0x40610001);//VAWD1
 	mii_mgr_write(31, 0x94, 0x40500001);//VAWD1
 	mii_mgr_write(31, 0x90, 0x80001002);//VTCR, VID=2
@@ -1192,7 +1192,7 @@ static void ResetSWusingGPIOx(void)
 	value = le32_to_cpu(*(volatile u_long *)PIODATA_R);
 	value &= ~(1 << 10);
 	*(volatile u_long *)(PIODATA_R) = cpu_to_le32(value);
-	
+
 	udelay(50000);
 	//Set Gpio pin 10 to high
 	value = le32_to_cpu(*(volatile u_long *)PIODATA_R);

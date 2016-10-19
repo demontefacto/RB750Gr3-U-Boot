@@ -14,11 +14,6 @@
 #include "../httpd/uip.h"
 #include "../httpd/uip_arp.h"
 
-#ifdef OLED_1_3
-#include <oled.h>
-#endif
-
-
 #if !defined(WEBFAILSAFE_UPLOAD_ART_ADDRESS)
 extern flash_info_t flash_info[];
 #endif
@@ -76,17 +71,7 @@ int do_http_upgrade(const ulong size, const int upgrade_type){
 				WEBFAILSAFE_UPLOAD_RAM_ADDRESS,
 				WEBFAILSAFE_UPLOAD_KERNEL_ADDRESS,
 				size);
-#ifdef OLED_1_3
-        OLED_Clear_page(2);
-        OLED_Clear_page(4);
-        OLED_Clear_page(6);
-        OLED_ShowString(0,2,"DownLoad:100%");
-#endif
         ret = raspi_erase_write((unsigned char*)(WEBFAILSAFE_UPLOAD_RAM_ADDRESS),WEBFAILSAFE_UPLOAD_KERNEL_ADDRESS,size);
-#ifdef OLED_1_3
-        if(ret == 0)
-            OLED_ShowString(0,6,"Loading Fireware");
-#endif
         return ret; 
 	} else if(upgrade_type == WEBFAILSAFE_UPGRADE_TYPE_ART){
 

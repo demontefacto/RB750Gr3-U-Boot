@@ -497,12 +497,6 @@ extern unsigned int  CFG_BLOCKSIZE;
  *  * Web Failsafe configuration
  *
  *   */
-#if 0
-    #define OLED_1_3
-#else 
-    #define LED_POWER
-#endif
-//#define GPIO_TEST
 
 #define CONFIG_NET_MULTI
 #define CONFIG_NET_VLAN
