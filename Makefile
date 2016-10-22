@@ -249,6 +249,9 @@ endif
 ifeq ($(MT7621_CPU_900MHZ), y)
 		echo "0 c25a00c0"|xxd -r|dd bs=1 seek=32 of=uboot_a.bin conv=notrunc
 endif
+ifeq ($(MT7621_CPU_1200MHZ), y)
+		echo "0 b25a00c0"|xxd -r|dd bs=1 seek=32 of=uboot_a.bin conv=notrunc
+endif
 ifeq ($(MT7621_CPU_875MHZ), y)
 		echo "0 224a00c0"|xxd -r|dd bs=1 seek=32 of=uboot_a.bin conv=notrunc
 endif
@@ -270,6 +273,9 @@ uboot_a.bin:	uboot.bin mt7621_stage_sram.bin
 		seek=$(shell stat -c %s uboot.bin)
 ifeq ($(MT7621_CPU_800MHZ), y)
 		echo "0 725a00c0"|xxd -r|dd bs=1 of=uboot_a.bin seek=$(shell echo "(($(shell stat -c %s uboot.bin)+32))" |bc)  conv=notrunc
+endif
+ifeq ($(MT7621_CPU_1200MHZ), y)
+		echo "0 b25a00c0"|xxd -r|dd bs=1 of=uboot_a.bin seek=$(shell echo "(($(shell stat -c %s uboot.bin)+32))" |bc)  conv=notrunc
 endif
 ifeq ($(MT7621_CPU_900MHZ), y)
 		echo "0 c25a00c0"|xxd -r|dd bs=1 of=uboot_a.bin seek=$(shell echo "(($(shell stat -c %s uboot.bin)+32))" |bc)  conv=notrunc
